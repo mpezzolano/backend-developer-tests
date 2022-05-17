@@ -1,12 +1,25 @@
-package models
+package storage
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
+
+type Storage interface {
+	AllPeople() []*Person
+	FindPersonByID(id uuid.UUID) (*Person, error)
+	FindPeopleByName(firstName, lastName string) []*Person
+	FindPeopleByPhoneNumber(phoneNumber string) []*Person
+}
+
+type storage struct{}
+
+func NewStorage() Storage {
+	return &storage{}
+}
 
 // Person defines a simple representation of a person
 type Person struct {
@@ -53,12 +66,12 @@ var people = []*Person{
 }
 
 // AllPeople returns all people in `people`.
-func AllPeople() []*Person {
+func (s storage) AllPeople() []*Person {
 	return people
 }
 
 // FindPersonByID searches for people in `people` the by their ID.
-func FindPersonByID(id uuid.UUID) (*Person, error) {
+func (s storage) FindPersonByID(id uuid.UUID) (*Person, error) {
 	for _, person := range people {
 		if person.ID == id {
 			return person, nil
@@ -69,7 +82,7 @@ func FindPersonByID(id uuid.UUID) (*Person, error) {
 }
 
 // FindPeopleByName performs a case-sensitive search for people in `people` by first and last name.
-func FindPeopleByName(firstName, lastName string) []*Person {
+func (s storage) FindPeopleByName(firstName, lastName string) []*Person {
 	result := make([]*Person, 0)
 
 	for _, person := range people {
@@ -82,7 +95,7 @@ func FindPeopleByName(firstName, lastName string) []*Person {
 }
 
 // FindPeopleByPhoneNumber searches for people in `people` by phone number.
-func FindPeopleByPhoneNumber(phoneNumber string) []*Person {
+func (s storage) FindPeopleByPhoneNumber(phoneNumber string) []*Person {
 	result := make([]*Person, 0)
 
 	for _, person := range people {
